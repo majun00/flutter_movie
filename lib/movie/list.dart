@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter/widgets.dart';
+import './detail.dart';
 
 Dio dio = new Dio();
 
@@ -13,12 +15,12 @@ class MovieList extends StatefulWidget {
 
   @override
   _MovieListState createState() {
-    return new _MovieListState();
+    return _MovieListState();
   }
 }
 
 // 有状态控件，必须结合一个状态管理类，来进行实现
-class _MovieListState extends State<MovieList> {
+class _MovieListState extends State<MovieList> with AutomaticKeepAliveClientMixin {
   // 默认显示第一页数据
   int page = 1;
   // 每页显示的数据条数
@@ -27,6 +29,9 @@ class _MovieListState extends State<MovieList> {
   var total = 0;
   // 电影列表数据
   var mlist = [];
+
+  @override
+  bool get wantKeepAlive => true;
 
   // 控件被创建的时候，会执行initState
   @override
@@ -43,32 +48,40 @@ class _MovieListState extends State<MovieList> {
       itemBuilder: (BuildContext ctx, int i) {
         // 每次循环，都拿到当前的电影item项
         var mitem = mlist[i];
-        return Container(
-            height: 200,
-            decoration: BoxDecoration(
-                color: Colors.white,
-                border: Border(top: BorderSide(color: Colors.black12))),
-            child: Row(
-              children: <Widget>[
-                Image.network(mitem['images']['small'],
-                    width: 130, height: 180, fit: BoxFit.cover),
-                Container(
-                  height: 200,
-                  padding: EdgeInsets.only(left: 10),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: <Widget>[
-                      Text('电影名称：${mitem['title']}'),
-                      Text('上映年份：${mitem['year']}'),
-                      Text('电影类型：${mitem['genres'].join('，')}'),
-                      Text('豆瓣评分：${mitem['rating']['average']}'),
-                      Text('主要演员：${mitem['title']}'),
-                    ],
-                  ),
-                )
-              ],
-            ));
+        return GestureDetector(
+            onTap: () {
+              // 跳转到详情
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (BuildContext ctx) {
+                return MovieDetail(id: mitem['id'], title: mitem['title']);
+              }));
+            },
+            child: Container(
+                height: 200,
+                decoration: BoxDecoration(
+                    color: Colors.white,
+                    border: Border(top: BorderSide(color: Colors.black12))),
+                child: Row(
+                  children: <Widget>[
+                    Image.network(mitem['images']['small'],
+                        width: 130, height: 180, fit: BoxFit.cover),
+                    Container(
+                      height: 200,
+                      padding: EdgeInsets.only(left: 10),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: <Widget>[
+                          Text('电影名称：${mitem['title']}'),
+                          Text('上映年份：${mitem['year']}'),
+                          Text('电影类型：${mitem['genres'].join('，')}'),
+                          Text('豆瓣评分：${mitem['rating']['average']}'),
+                          Text('主要演员：${mitem['title']}'),
+                        ],
+                      ),
+                    )
+                  ],
+                )));
       },
     );
   }
